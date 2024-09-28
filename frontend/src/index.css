@@ -2,7 +2,7 @@
 :root {
   --color-dark: #242424;
   --color-light: white;
-  --accent-color: #646cff;
+  --accent-color: #6fd357;
   --button-background-dark: #1a1a1a;
   --button-background-light: #f9f9f9;
 
@@ -62,68 +62,48 @@ button:focus-visible {
 nav {
   display: flex;
   justify-content: center;
-  margin-bottom: 3rem;
-  z-index: 1000;
+  z-index:  000; /* Ensure the nav is layered on top */
+  margin-bottom: -3rem;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--button-background-dark);
-  padding: 20px 15px;
+  gap: 12px; /* Add space between links */
+  background: var(--color-light); /* Add a solid background to ensure no see-through */
+  padding: 30px 40px; /* Padding to give it some internal spacing */
   border-radius: 12px;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-  position: fixed;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); /* Optional shadow for the nav container */
 }
 
 .nav-links li {
   list-style: none;
-  margin: 0 12px;
 }
 
 .nav-links li a {
   position: relative;
-  color: var(--color-light);
+  color: var(--color-dark); /* Use dark color for text */
   font-size: 20px;
   font-weight: 500;
-  padding: 6px 0;
-  transition: color 0.4s ease;
+  padding: 10px 20px; /* Padding for button-like effect */
+  background: var(--button-background-light); /* Ensure the buttons have a solid background */
+  border-radius: 12px; /* Rounded corners for button-like effect */
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); /* Button shadow */
+  transition: background 0.3s ease, color 0.3s ease;
+  text-decoration: none;
 }
 
-/* -- Nav link hover animation -- */
-.nav-links li a:before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  width: 0%;
-  background: var(--accent-color);
-  border-radius: 12px;
-  transition: width 0.4s ease;
-}
-
-.nav-links li a:hover:before {
-  width: 100%;
+/* -- Hover Effect for Links -- */
+.nav-links li a:hover {
+  background: var(--accent-color); /* Change background color on hover */
+  color: var(--color-light); /* Ensure text remains visible */
 }
 
 /* -- Active State for Nav Links -- */
 .nav-links li a.active {
-  color: var(--accent-color); 
+  color: var(--accent-color);
   font-weight: bold;
-}
-
-/* -- Upward Animation for Nav Links -- */
-.nav-links li.upward a:before {
-  width: 100%;
-  bottom: -5px;
-  opacity: 0;
-}
-
-.nav-links li.upward a:hover:before {
-  bottom: 0;
-  opacity: 100%;
 }
 
 /* -- Foresights Logo and Icon -- */
@@ -284,6 +264,11 @@ nav {
 
 .authors.rotate {
   transform: rotate(360deg);
+}
+
+
+.authors:hover {
+  fill: var(--accent-color); /* Color change on hover */
 }
 
 /* -- Popup for Author Links -- */
