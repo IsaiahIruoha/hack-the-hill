@@ -9,3 +9,6 @@ app.include_router(ai_router, prefix="/ai", tags=["ai"])
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
+
+
