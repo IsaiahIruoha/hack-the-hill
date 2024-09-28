@@ -1,35 +1,105 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  const [isPopupVisible, setIsPopupVisible] = useState(false); // State to track popup visibility
+  const [days, setDays] = useState({}); // Store streak data with date strings as keys
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+
+  // Helper function to get date string in 'YYYY-MM-DD' format
+  const getDateString = (date) => {
+    return date.toISOString().split('T')[0];
+  };
+
+  // Generate an array of the last 7 dates including today
+  const getLast7Days = () => {
+    const last7Days = [];
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      last7Days.push(date);
+    }
+    return last7Days;
+  };
 
   // Function to toggle popup visibility
   const togglePopup = () => {
     setIsPopupVisible(!isPopupVisible);
   };
 
+  // Load streak data from localStorage
+  useEffect(() => {
+    const storedDays = JSON.parse(localStorage.getItem('streakDays')) || {};
+    setDays(storedDays);
+  }, []);
+
+  // Function to mark current day as complete when simulator is launched
+  const markDayAsComplete = () => {
+    const todayString = getDateString(new Date());
+    const updatedDays = { ...days, [todayString]: 'completed' };
+    setDays(updatedDays);
+    localStorage.setItem('streakDays', JSON.stringify(updatedDays));
+  };
+
+  // Function to determine if a day is active, completed, or inactive
+  const getDayStatus = (dateString) => {
+    const todayString = getDateString(new Date());
+    if (dateString === todayString) {
+      return days[dateString] === 'completed' ? 'completed' : 'active';
+    } else {
+      return days[dateString] === 'completed' ? 'completed' : 'inactive';
+    }
+  };
+
+  // Function to calculate the current streak count
+  const getStreakCount = () => {
+    let streak = 0;
+    let today = new Date();
+    let dateString = getDateString(today);
+    while (days[dateString] === 'completed') {
+      streak++;
+      today.setDate(today.getDate() - 1);
+      dateString = getDateString(today);
+    }
+    return streak;
+  };
+
   return (
     <div className="container">
       <div id="home"></div>
       <nav>
-        <a className='foresights' href='https://foresights.ca' target='_blank'> 
+        <a className="foresights" href="https://foresights.ca" target="_blank" rel="noreferrer">
           <img src="/favicon.png" alt="foresights logo" />
         </a>
         <ul className="nav-links">
-          <li className="upward">
-            <a href="/dashboard">Dashboard</a>
-          </li>
-          <li className="upward">
-            <a href="/one">One</a>
-          </li>
-          <li className="upward">
-            <a href="/two">Two</a>
-          </li>
-          <li className="upward">
-            <a href="/three">Three</a>
-          </li>
+          {getLast7Days().map((date) => {
+            const dateString = getDateString(date);
+            const dayLabel = date.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2);
+            const dayStatus = getDayStatus(dateString);
+
+            return (
+              <li key={dateString}>
+                <span className="day-label">{dayLabel}</span>
+                <div className={`day-icon ${dayStatus}`}>
+                  {/* Checkmark for completed days and cross for active/inactive */}
+                  {dayStatus === 'completed' ? (
+                  <span className="checkmark">
+                    <i className="fas fa-check"></i>  {/* FontAwesome check icon */}
+                  </span>
+                ) : (
+                  <span className="crossmark">
+                    <i className="fas fa-times"></i>  {/* FontAwesome cross icon */}
+                  </span>
+                )}
+                </div>
+              </li>
+            );
+          })}
         </ul>
+        <div className="streak-icon-container">
+          <img src="/flame.png" alt="streak icon" className="streak-icon" />
+          <p className="streak-count">{getStreakCount()}</p>
+        </div>
       </nav>
 
       <div className="content-box">
@@ -54,7 +124,7 @@ function App() {
             </div>
           </div>
           <div className="image-placeholder">
-          {/* Placeholder div for future content */}
+            {/* Placeholder div for future content */}
           </div>
         </div>
       </div>
@@ -64,16 +134,26 @@ function App() {
           href="https://foresights.ca/simulator"
           className="btn btn-more"
           target="_blank"
-        >Launch Simulator<i className="fas fa-chevron-right"></i></a>
+          rel="noreferrer"
+          onClick={markDayAsComplete}
+        >
+          Launch Simulator<i className="fas fa-chevron-right"></i>
+        </a>
       </div>
 
       {isPopupVisible && (
         <div className="popup visible">
           <h3>Authors</h3>
           <hr />
-          <a href="https://www.linkedin.com/in/isaiahiruoha/" target="_blank">Isaiah Iruoha</a>
-          <a href="https://www.linkedin.com/in/connorleung/" target="_blank">Connor Leung</a>
-          <a href="https://www.linkedin.com/in/ryan-z-su/" target="_blank">Ryan Su</a>
+          <a href="https://www.linkedin.com/in/isaiahiruoha/" target="_blank" rel="noreferrer">
+            Isaiah Iruoha
+          </a>
+          <a href="https://www.linkedin.com/in/connorleung/" target="_blank" rel="noreferrer">
+            Connor Leung
+          </a>
+          <a href="https://www.linkedin.com/in/ryan-z-su/" target="_blank" rel="noreferrer">
+            Ryan Su
+          </a>
         </div>
       )}
       <div className="icon-background" onClick={togglePopup}>

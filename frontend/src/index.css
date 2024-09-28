@@ -62,7 +62,7 @@ button:focus-visible {
 nav {
   display: flex;
   justify-content: center;
-  z-index:  000; /* Ensure the nav is layered on top */
+  z-index: 1000; /* Ensure the nav is layered on top */
   margin-bottom: -3rem;
 }
 
@@ -70,41 +70,118 @@ nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px; /* Add space between links */
-  background: var(--color-light); /* Add a solid background to ensure no see-through */
-  padding: 30px 40px; /* Padding to give it some internal spacing */
+  gap: 25px; /* Add space between the days */
+  padding: 1rem 2rem; /* Adjusted padding to balance the height */
   border-radius: 12px;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); /* Optional shadow for the nav container */
 }
 
 .nav-links li {
   list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.nav-links li a {
-  position: relative;
-  color: var(--color-dark); /* Use dark color for text */
-  font-size: 20px;
+/* Day icon container for circular buttons */
+.nav-links li .day-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--button-background-light); /* Default background */
+  transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Completed state */
+.nav-links li .day-icon.completed {
+  background-color: var(--accent-color); 
+  color: var(--color-light); /* White checkmark */
+}
+
+/* Inactive state */
+.nav-links li .day-icon.inactive {
+  background-color: var(--button-background-dark); /* Gray for inactive */
+  color: var(--color-light); /* Keep checkmark color consistent */
+}
+
+/* Active state */
+.nav-links li .day-icon.active {
+  background-color: var(--button-background-light);
+  color: var(--color-light);
+}
+
+/* Checkmark inside the day icon */
+.nav-links li .day-icon .checkmark {
+  font-size: 1.5rem;
+}
+
+/* Day labels (for day abbreviations) */
+.nav-links li .day-label {
+  margin-top: 8px;
+  font-size: 1.2rem;
+  color: var(--color-dark);
   font-weight: 500;
-  padding: 10px 20px; /* Padding for button-like effect */
-  background: var(--button-background-light); /* Ensure the buttons have a solid background */
-  border-radius: 12px; /* Rounded corners for button-like effect */
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); /* Button shadow */
-  transition: background 0.3s ease, color 0.3s ease;
-  text-decoration: none;
 }
 
-/* -- Hover Effect for Links -- */
-.nav-links li a:hover {
-  background: var(--accent-color); /* Change background color on hover */
-  color: var(--color-light); /* Ensure text remains visible */
+/* Hover effect on the day icon */
+.nav-links li .day-icon:hover {
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* -- Active State for Nav Links -- */
-.nav-links li a.active {
-  color: var(--accent-color);
+/* -- Streak Icon Animation -- */
+.streak-icon-container {
+  position: relative;
+  top: 1rem;
+  left: 1rem;
+  background-color: var(--button-background-light);
+  padding: 0.5rem;
+  border-radius: 12px;
+  height: 6.4rem;
+  width: 6rem;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.streak-count {
+  position: absolute;
+  font-size: 2rem;
   font-weight: bold;
+  color: var(--color-light);
+  z-index: 1;
+  animation: streakSmoothAnimation 1.5s ease-in-out infinite; /* Smoother and faster */
 }
+
+.streak-icon {
+  height: 80%;
+  width: 80%;
+  position: absolute;
+  animation: streakSmoothAnimation 1.5s ease-in-out infinite; /* Matches the streak count */
+}
+
+@keyframes streakSmoothAnimation {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px); /* Slightly bigger movement for a more noticeable effect */
+  }
+}
+
+.checkmark {
+  color: var(--color-dark);
+  font-size: 1.5rem;
+}
+
+.crossmark {
+  color: var(--color-light);
+  font-size: 1.5rem;
+}
+
 
 /* -- Foresights Logo and Icon -- */
 .foresights {
@@ -131,7 +208,6 @@ nav {
   display: flex;
   flex-direction: column;
   margin-top: 10rem;
-  margin-bottom: 3rem;
 }
 
 .content {
