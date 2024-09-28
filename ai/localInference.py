@@ -1,3 +1,5 @@
+import pyrealsense2 as rs
+import numpy as np
 import cv2
 import time
 import math
@@ -14,17 +16,51 @@ version_number = 1
 # Point to the local inference server instead of the remote one
 model = project.version(version_number=version_number, local=local_inference_server_address).model
 
-# Function to calculate Euclidean distance between two points
-def calculate_distance(x1, y1, x2, y2):
-    return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+# Define maximum thresholds and history lengths
+MAX_SPEED = 150  # max golf swing speed (m/s)
+MAX_ANGLE = 90  # max possible launch angle in degrees
+HISTORY_LENGTH = 5  # Number of frames to use in the moving average
 
-# Function to draw bounding boxes and display speed
-def draw_bounding_boxes(frame, result, prev_box, prev_time):
+# Variables to store history
+speed_history = []
+launch_angle_history = []
+
+# Function to calculate Euclidean distance between two 3D points
+def calculate_distance_3d(x1, y1, z1, x2, y2, z2):
+    return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2)
+
+# Function to calculate launch angle using two points (top and bottom of club)
+def calculate_launch_angle(top_z, bottom_z, top_y, bottom_y):
+    # Get the differences in z and y to calculate the angle
+    delta_z = bottom_z - top_z
+    delta_y = bottom_y - top_y
+
+    # Calculate the launch angle using arctangent, and ensure it's an absolute value
+    launch_angle = abs(math.degrees(math.atan2(delta_z, delta_y)) * 10)
+
+    # Ensure angle is within a reasonable range
+    if abs(launch_angle) > MAX_ANGLE:
+        return 0
+    return launch_angle
+
+# Function to calculate a moving average for a list of values
+def moving_average(values):
+    if len(values) == 0:
+        return 0
+    return sum(values) / len(values)
+
+def track_club_movement(frame, result, prev_position, prev_time, depth_frame):
     predictions = result['predictions']
+    
+    # Initialize avg_speed and avg_launch_angle to default values
+    avg_speed = 0  
+    avg_launch_angle = 0  
     speed = 0  # Default speed
+    launch_angle = 0  # Default launch angle
+    position_3d = None  # To hold the current position of the club face
 
     if predictions:
-        prediction = predictions[0]  # Assuming we're only tracking the first detected object
+        prediction = predictions[0]  # Assuming we're only tracking the first detected object (club face)
         x = int(prediction['x'])
         y = int(prediction['y'])
         width = int(prediction['width'])
@@ -41,75 +77,140 @@ def draw_bounding_boxes(frame, result, prev_box, prev_time):
         cv2.putText(frame, f"{class_name}: {confidence:.2f}", (x - width // 2, y - height // 2 - 10), 
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
-        # Calculate speed if we have a previous bounding box
-        if prev_box is not None:
-            prev_x, prev_y = prev_box
+        # Get the top and bottom of the bounding box
+        top_y = y - height // 2
+        bottom_y = y + height // 2
+
+        # Get the center of the bounding box
+        cx = (x + (x + width)) // 2
+
+        # Ensure cx and cy are within the bounds of the image dimensions
+        depth_width = depth_frame.get_width()
+        depth_height = depth_frame.get_height()
+
+        # Clamp the coordinates to stay within image bounds
+        cx = np.clip(cx, 0, depth_width - 1)
+        top_y = np.clip(top_y, 0, depth_height - 1)
+        bottom_y = np.clip(bottom_y, 0, depth_height - 1)
+
+        # Get depth values for the top and bottom of the club face
+        top_depth = depth_frame.get_distance(cx, top_y)
+        bottom_depth = depth_frame.get_distance(cx, bottom_y)
+
+        # 3D position of the club face (average of top and bottom points)
+        position_3d = (cx, (top_y + bottom_y) // 2, (top_depth + bottom_depth) / 2)
+
+        # Print the 3D coordinates of the club face
+        print(f"Club Face Position - 3D (x, y, z): ({cx}, {(top_y + bottom_y) // 2}, {(top_depth + bottom_depth) / 2:.2f} meters)")
+
+        # Calculate launch angle
+        launch_angle = calculate_launch_angle(top_depth, bottom_depth, top_y, bottom_y)
+
+        # Add launch angle to history and calculate moving average
+        launch_angle_history.append(launch_angle)
+        if len(launch_angle_history) > HISTORY_LENGTH:
+            launch_angle_history.pop(0)
+        avg_launch_angle = moving_average(launch_angle_history)
+
+        # If there's a previous position, calculate speed and direction of movement
+        if prev_position is not None:
+            prev_x, prev_y, prev_z = prev_position
             current_time = time.time()
             time_diff = current_time - prev_time
 
-            # Calculate distance moved between frames and speed
-            distance = calculate_distance(prev_x, prev_y, x, y)
-            speed = distance / time_diff  # Speed = distance / time
+            # Calculate the distance moved in 3D space
+            distance_moved = calculate_distance_3d(prev_x, prev_y, prev_z, cx, (top_y + bottom_y) // 2, (top_depth + bottom_depth) / 2)
 
-            # Update the previous bounding box and time
-            prev_box = (x, y)
+            # Calculate the speed (distance moved per time unit)
+            speed = distance_moved / time_diff if time_diff > 0 else 0
+
+            # Add speed to history and calculate moving average
+            speed_history.append(speed)
+            if len(speed_history) > HISTORY_LENGTH:
+                speed_history.pop(0)
+            avg_speed = moving_average(speed_history)
+
+            # Safety check: Ensure speed is within reasonable bounds
+            if avg_speed > MAX_SPEED:
+                avg_speed = 0  # Reset speed if it's abnormally high
+
+            # Print the speed and movement information
+            print(f"Speed: {avg_speed:.2f} m/s, Distance Moved: {distance_moved:.2f} meters")
+
+            # Update the previous position and time
+            prev_position = (cx, (top_y + bottom_y) // 2, (top_depth + bottom_depth) / 2)
             prev_time = current_time
         else:
-            # Set the initial previous bounding box and time
-            prev_box = (x, y)
+            # Set the initial position and time if this is the first detection
+            prev_position = (cx, (top_y + bottom_y) // 2, (top_depth + bottom_depth) / 2)
             prev_time = time.time()
 
-    # Display speed on the frame (top right corner)
-    cv2.putText(frame, f"Speed: {speed:.2f} px/s", (frame.shape[1] - 150, 30), 
-                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+    return frame, prev_position, prev_time, avg_speed, avg_launch_angle
 
-    return frame, prev_box, prev_time
 
-# Initialize webcam feed
-cap = cv2.VideoCapture(0)  # 0 is the default webcam
+# Configure RealSense camera
+pipeline = rs.pipeline()
+config = rs.config()
+config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)  # RGB Camera
+config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)   # Depth Camera
 
-if not cap.isOpened():
-    print("Error: Could not open webcam.")
-    exit()
+# Align depth to RGB
+align_to = rs.stream.color
+align = rs.align(align_to)
 
-# Optionally reduce the resolution for faster processing
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  # Width
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)  # Height
+# Start streaming from RealSense camera
+pipeline.start(config)
 
-# Initialize variables for tracking speed
-prev_box = None  # To store previous bounding box center
-prev_time = time.time()  # To store previous frame time
+# Initialize variables for tracking speed and movement
+prev_position = None  # To store the previous position of the club face in 3D
+prev_time = time.time()  # To store the previous frame time
 
 # Set frame rate limit (adjust according to your processing speed)
 frame_rate = 60  # Set the frame rate (in frames per second)
 prev_time_frame = 0
 
-while True:
-    # Capture frame-by-frame
-    ret, frame = cap.read()
+try:
+    while True:
+        # Wait for a new set of frames
+        frames = pipeline.wait_for_frames()
 
-    if not ret:
-        print("Failed to grab frame")
-        break
+        # Align the depth frame to the RGB frame
+        aligned_frames = align.process(frames)
 
-    # Limit the frame rate
-    time_elapsed = time.time() - prev_time_frame
-    if time_elapsed > 1. / frame_rate:
-        prev_time_frame = time.time()
+        # Get RGB and depth frames
+        color_frame = aligned_frames.get_color_frame()
+        depth_frame = aligned_frames.get_depth_frame()
 
-        # Send the frame to the local inference server and get results
-        result = model.predict(frame).json()  # Use the Roboflow SDK for local inference
+        if not color_frame or not depth_frame:
+            continue
 
-        # Draw bounding boxes around detected objects and calculate speed
-        frame, prev_box, prev_time = draw_bounding_boxes(frame, result, prev_box, prev_time)
+        # Convert RGB frame to numpy array
+        color_image = np.asanyarray(color_frame.get_data())
 
-    # Display the resulting frame in a window
-    cv2.imshow('Webcam Feed', frame)
+        # Limit the frame rate
+        time_elapsed = time.time() - prev_time_frame
+        if time_elapsed > 1. / frame_rate:
+            prev_time_frame = time.time()
 
-    # Break the loop if 'q' is pressed
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+            # Send the RGB frame to the local inference server and get results
+            result = model.predict(color_image).json()  # Use the Roboflow SDK for local inference
 
-# Release the capture when everything is done
-cap.release()
-cv2.destroyAllWindows()
+            # Track the club face movement in 3D space
+            color_image, prev_position, prev_time, avg_speed, avg_launch_angle = track_club_movement(
+                color_image, result, prev_position, prev_time, depth_frame)
+
+            # Display moving average speed and launch angle on the screen
+            cv2.putText(color_image, f"Speed (Avg): {avg_speed:.2f} m/s", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            cv2.putText(color_image, f"Launch Angle (Avg): {avg_launch_angle:.2f} degrees", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+
+        # Show the image with detections and calculations using OpenCV
+        cv2.imshow('RealSense with Club Movement Tracking', color_image)
+
+        # Exit on pressing 'q'
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+finally:
+    # Stop streaming and clean up
+    pipeline.stop()
+    cv2.destroyAllWindows()
