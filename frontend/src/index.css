@@ -1,0 +1,488 @@
+/* -- Root Variables for Colors and Fonts -- */
+:root {
+  --color-dark: #242424;
+  --color-light: white;
+  --accent-color: #6fd357;
+  --button-background-dark: #1a1a1a;
+  --button-background-light: #f9f9f9;
+
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* -- Global Styles for Body and Links -- */
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  overflow-x: hidden;
+}
+
+a {
+  font-weight: 500;
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-color);
+}
+
+/* -- Button Styles -- */
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 1rem;
+  background-color: var(--button-background-light);
+  color: var(--accent-color);
+  transition: border-color 0.25s;
+}
+
+button:hover {
+  border-color: var(--accent-color);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* -- Navigation Styles -- */
+nav {
+  display: flex;
+  justify-content: center;
+  z-index: 1000;
+  margin-bottom: -6rem;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+}
+
+.nav-links li {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nav-links li .day-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--button-background-light);
+  transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.nav-links li .day-icon.completed {
+  background-color: var(--accent-color);
+  color: var(--color-light);
+}
+
+.nav-links li .day-icon.inactive {
+  background-color: var(--color-dark);
+  color: var(--color-light);
+}
+
+.nav-links li .day-icon.active {
+  background-color: var(--button-background-light);
+  color: var(--color-light);
+}
+
+.nav-links li .day-icon .checkmark {
+  font-size: 1.5rem;
+}
+
+.nav-links li .day-label {
+  margin-top: 8px;
+  font-size: 1.2rem;
+  color: var(--button-background-dark);
+  font-weight: 500;
+}
+
+.nav-links li .day-icon:hover {
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+.streak-icon-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background-color: var(--button-background-light);
+  padding: 0.5rem;
+  border-radius: 12px;
+  height: 6.4rem;
+  width: 6rem;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.streak-count {
+  position: absolute;
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--color-light);
+  z-index: 1;
+  animation: streakSmoothAnimation 3s ease-in-out infinite;
+}
+
+.streak-icon {
+  height: 80%;
+  width: 80%;
+  position: absolute;
+  animation: streakSmoothAnimation 3s ease-in-out infinite;
+}
+
+@keyframes streakSmoothAnimation {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.checkmark {
+  color: var(--color-dark);
+  font-size: 1.5rem;
+}
+
+.crossmark {
+  font-size: 1.5rem;
+}
+
+.day-icon.inactive .crossmark {
+  color: var(--color-light);
+}
+
+.day-icon.active .crossmark {
+  color: var(--color-dark);
+}
+
+.foresights {
+  position: fixed;
+  height: 6rem;
+  width: 6rem;
+  left: 2rem;
+  top: 2rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 5rem;
+}
+
+.content-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: 10rem;
+  padding: 0 2rem;
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  height: auto;
+  flex-direction: column;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 800px;
+  margin: -1rem auto;
+}
+
+.stat-box {
+  background-color: var(--button-background-light);
+  color: var(--color-dark);
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.stat-box h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-box p {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.btn-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 450px;
+  border-radius: 20px;
+  background-color: var(--button-background-light);
+  margin-top: 2rem;
+  z-index: -1;
+  animation: headerAnimation 2s ease-in-out infinite;
+}
+
+@keyframes headerAnimation {
+  0%,
+  100% {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.btn {
+  position: relative;
+  top: 3vh;
+  display: inline-block;
+  padding: 1rem 2rem;
+  border: 3px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  background-color: var(--button-background-light);
+  color: var(--color-dark);
+}
+
+.btn:hover {
+  border-color: var(--accent-color);
+}
+
+.btn-more {
+  font-size: 1.5em;
+  margin-top: 3rem;
+  width: 15rem;
+  transition: background 0.3s ease-out;
+}
+
+.btn-more:hover > i {
+  transform: translateX(0.75rem);
+}
+
+.btn-more > i {
+  margin-left: 10px;
+  transition: transform 0.3s ease-out;
+}
+
+/* -- Author Popup -- */
+.icon-background {
+  position: fixed;
+  left: 1rem;
+  bottom: 1rem;
+  background-color: var(--button-background-light);
+  padding: 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.5s ease;
+}
+
+.authors {
+  fill: var(--color-dark);
+  height: 2rem;
+  width: 2rem;
+  transition: transform 0.5s ease;
+  background-color: var(--button-background-light);
+}
+
+.authors.rotate {
+  transform: rotate(360deg);
+}
+
+.authors:hover {
+  fill: var(--accent-color);
+}
+
+.popup.authors-popup {
+  position: fixed;
+  bottom: 6rem;
+  left: 1rem;
+  background-color: var(--button-background-light);
+  padding: 1.8rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-height: 30rem;
+  overflow: auto;
+  z-index: 500;
+  transition: max-height 0.5s ease-in-out;
+}
+
+.popup.authors-popup a {
+  display: block;
+  margin: 0.5rem 0;
+  font-size: 1.2rem;
+  color: var(--color-dark);
+  opacity: 0.8;
+}
+
+.popup.authors-popup a:hover {
+  color: var(--accent-color);
+}
+
+/* -- Coach Popup -- */
+.coach-container {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.coach-image {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.coach-lightbulb {
+  position: absolute;
+  top: -0.5rem;
+  right: 0.5rem;
+  font-size: 2rem;
+  color: yellow;
+  transition: transform 0.3s ease;
+}
+
+.coach-container:hover .coach-image,
+.coach-container:hover .coach-lightbulb {
+  transform: scale(1.1);
+}
+
+.popup.coach-popup {
+  position: fixed;
+  bottom: 8rem;
+  right: 2rem; /* Keep it close to the right, but use transform to adjust */
+  background-color: var(--button-background-light);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
+  max-width: 685px;
+  width: 100%;
+  height: 100%;
+  max-height: 13rem;
+  overflow: auto;
+  z-index: 550;
+  transition: max-width 0.5s ease-in-out, max-height 0.5s ease-in-out;
+
+  transform: translateX(-1rem); /* Move it left by 5rem, adjust this value to move it more */
+}
+
+.popup.coach-popup p {
+  white-space: normal;
+  line-height: 1.5;
+}
+
+.hidden {
+  display: none;
+}
+
+/* -- Media Queries for Responsiveness -- */
+@media (max-width: 768px) {
+  .nav-links {
+    gap: 15px;
+    padding: 0.5rem 1rem;
+  }
+
+  .nav-links li .day-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .nav-links li .day-label {
+    font-size: 1rem;
+  }
+
+  .stat-box h3 {
+    font-size: 1.2rem;
+  }
+
+  .stat-box p {
+    font-size: 1.6rem;
+  }
+
+  .streak-icon-container {
+    height: 5rem;
+    width: 4.8rem;
+  }
+
+  .streak-count {
+    font-size: 1.6rem;
+  }
+
+  .coach-image {
+    width: 5rem;
+    height: 5rem;
+  }
+
+  .coach-lightbulb {
+    font-size: 1.8rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .content {
+    flex-direction: row;
+  }
+
+  .stats {
+    width: 45%;
+  }
+
+  .image-placeholder {
+    width: 48%;
+    margin-left: 2rem;
+    margin-top: 0;
+  }
+
+  .btn-container {
+    justify-content: flex-start;
+    padding-left: 13%;
+  }
+
+  .popup.coach-popup {
+    bottom: 1rem;
+    right: calc(6rem + 2rem);
+  }
+}
