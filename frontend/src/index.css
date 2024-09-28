@@ -253,6 +253,13 @@ nav {
   font-weight: bold;
 }
 
+/* -- Button Container Styling -- */
+.btn-container {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 2rem;
+  padding-left: 13%; /* Adjust this value to move the button more or less to the right */
+}
 
 /* -- Text and Image Styling -- */
 .text {
@@ -300,7 +307,7 @@ nav {
   top: 3vh; 
   display: inline-block;
   padding: 1rem 2rem;
-  border: 1px solid transparent;
+  border: 3px solid transparent;
   border-radius: 8px;
   cursor: pointer;
   transition: border-color 0.25s;
@@ -385,6 +392,71 @@ nav {
 
 .popup a:hover {
   color: var(--accent-color);
+}
+
+.coach-container {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.coach-image {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease; /* Smooth scaling */
+}
+
+.coach-lightbulb {
+  position: absolute;
+  top: -0.5rem;
+  right: 0.5rem;
+  font-size: 2rem;
+  color: yellow;
+  transition: transform 0.3s ease; /* Smooth scaling */
+}
+
+/* Hover both image and lightbulb */
+.coach-container:hover .coach-image,
+.coach-container:hover .coach-lightbulb {
+  transform: scale(1.1); /* Scales both elements */
+}
+
+/* Coach Popup Styling */
+.popup.coach-popup {
+  position: fixed;
+  bottom: 1rem;
+  left: 58rem; /* Aligns the popup to the left of the coach icon */
+  background-color: var(--button-background-light);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
+  width: 42rem; 
+  height: 11rem; 
+  overflow: auto; /* Allows scrolling if content overflows vertically */
+  transition: max-width 0.5s ease-in-out, max-height 0.5s ease-in-out; /* Smooth transition */
+}
+
+/* Ensure the text inside doesn't overflow */
+.popup.coach-popup p {
+  white-space: normal; /* Ensure text wraps within the container */
+  line-height: 1.5;
+}
+
+/* Coach popup hover and active state */
+.coach-popup.visible {
+  max-width: 80rem;
+  overflow-x: hidden; /* Disable horizontal scrolling */
+  overflow-y: auto; /* Allow vertical scrolling if needed */
+}
+
+/* Hidden Class - used when popup is visible */
+.hidden {
+  display: none; /* Hides the lightbulb */
 }
 
 /* -- Media Query for Larger Screens -- */

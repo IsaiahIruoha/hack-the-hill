@@ -4,6 +4,7 @@ import './App.css';
 function App() {
   const [days, setDays] = useState({}); // Store streak data with date strings as keys
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [isCoachPopupVisible, setIsCoachPopupVisible] = useState(false);
 
   // Helper function to get date string in 'YYYY-MM-DD' format
   const getDateString = (date) => {
@@ -25,6 +26,10 @@ function App() {
   // Function to toggle popup visibility
   const togglePopup = () => {
     setIsPopupVisible(!isPopupVisible);
+  };
+
+  const toggleCoachPopup = () => {
+    setIsCoachPopupVisible(!isCoachPopupVisible);
   };
 
   // Load streak data from localStorage
@@ -129,7 +134,7 @@ function App() {
         </div>
       </div>
 
-      <div>
+      <div className="btn-container">
         <a
           href="https://foresights.ca/simulator"
           className="btn btn-more"
@@ -176,6 +181,20 @@ function App() {
         </g>
         </svg>
       </div> 
+      <div className="coach-container" onClick={toggleCoachPopup}>
+        <img src="coach.png" alt="Coach" className="coach-image" />
+  
+        {/* Lightbulb icon */}
+        <i className={`fas fa-lightbulb coach-lightbulb ${isCoachPopupVisible ? 'hidden' : ''}`}></i>
+        
+        {isCoachPopupVisible && (
+          <div className="popup coach-popup visible">
+            <h3>Professor Par</h3>
+            <hr />
+            <p>"Consistency is key—every swing builds your mastery. Focus on your form today, and tomorrow's power will follow!"</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
