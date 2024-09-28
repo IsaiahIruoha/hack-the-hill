@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from app.ai_models.cohere import CohereClient
+from app.ai_models.cohere_ai import CohereClient
 from pydantic import BaseModel
 
 # Initialize the router
