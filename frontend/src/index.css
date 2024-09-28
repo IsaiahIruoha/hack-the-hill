@@ -63,7 +63,7 @@ nav {
   display: flex;
   justify-content: center;
   z-index: 1000; /* Ensure the nav is layered on top */
-  margin-bottom: -3rem;
+  margin-bottom: -6rem;
 }
 
 .nav-links {
@@ -103,7 +103,7 @@ nav {
 
 /* Inactive state */
 .nav-links li .day-icon.inactive {
-  background-color: var(--button-background-dark); /* Gray for inactive */
+  background-color: var(--color-dark); /* Gray for inactive */
   color: var(--color-light); /* Keep checkmark color consistent */
 }
 
@@ -122,7 +122,7 @@ nav {
 .nav-links li .day-label {
   margin-top: 8px;
   font-size: 1.2rem;
-  color: var(--color-dark);
+  color: var(--button-background-dark);
   font-weight: 500;
 }
 
@@ -153,14 +153,14 @@ nav {
   font-weight: bold;
   color: var(--color-light);
   z-index: 1;
-  animation: streakSmoothAnimation 1.5s ease-in-out infinite; /* Smoother and faster */
+  animation: streakSmoothAnimation 3s ease-in-out infinite; /* Smoother and faster */
 }
 
 .streak-icon {
   height: 80%;
   width: 80%;
   position: absolute;
-  animation: streakSmoothAnimation 1.5s ease-in-out infinite; /* Matches the streak count */
+  animation: streakSmoothAnimation 3s ease-in-out infinite; /* Matches the streak count */
 }
 
 @keyframes streakSmoothAnimation {
@@ -177,11 +177,20 @@ nav {
   font-size: 1.5rem;
 }
 
+/* Styles for the crossmark */
 .crossmark {
-  color: var(--color-light);
   font-size: 1.5rem;
 }
 
+/* Red cross for inactive days */
+.day-icon.inactive .crossmark {
+  color: var(--color-light);
+}
+
+/* Gray cross for active days */
+.day-icon.active .crossmark {
+  color: var(--color-dark);
+}
 
 /* -- Foresights Logo and Icon -- */
 .foresights {
