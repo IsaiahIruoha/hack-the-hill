@@ -147,7 +147,7 @@ function App() {
       </div>
 
       {isPopupVisible && (
-        <div className="popup visible">
+        <div className="popup visible authors-popup">
           <h3>Authors</h3>
           <hr />
           <a href="https://www.linkedin.com/in/isaiahiruoha/" target="_blank" rel="noreferrer">
