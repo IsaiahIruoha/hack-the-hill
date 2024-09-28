@@ -158,7 +158,7 @@ function App() {
       </div>
 
       {isPopupVisible && (
-        <div className="popup visible">
+        <div className="popup visible authors-popup">
           <h3>Authors</h3>
           <hr />
           <a

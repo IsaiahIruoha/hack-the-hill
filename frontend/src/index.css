@@ -20,8 +20,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: var(--color-dark);
-  color: var(--color-light);
+  background-color: var(--color-light);
+  color: var(--color-dark);
   overflow-x: hidden;
 }
 
@@ -44,7 +44,7 @@ button {
   font-weight: 500;
   cursor: pointer;
   margin: 1rem;
-  background-color: var(--button-background-dark);
+  background-color: var(--button-background-light);
   color: var(--accent-color);
   transition: border-color 0.25s;
 }
@@ -62,7 +62,7 @@ button:focus-visible {
 nav {
   display: flex;
   justify-content: center;
-  z-index: 1000; /* Ensure the nav is layered on top */
+  z-index: 1000;
   margin-bottom: -6rem;
 }
 
@@ -70,8 +70,8 @@ nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 25px; /* Add space between the days */
-  padding: 1rem 2rem; /* Adjusted padding to balance the height */
+  gap: 25px;
+  padding: 1rem 2rem;
   border-radius: 12px;
 }
 
@@ -82,7 +82,6 @@ nav {
   align-items: center;
 }
 
-/* Day icon container for circular buttons */
 .nav-links li .day-icon {
   width: 50px;
   height: 50px;
@@ -90,35 +89,30 @@ nav {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: var(--button-background-light); /* Default background */
+  background-color: var(--button-background-light);
   transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Completed state */
 .nav-links li .day-icon.completed {
-  background-color: var(--accent-color); 
-  color: var(--color-light); /* White checkmark */
+  background-color: var(--accent-color);
+  color: var(--color-light);
 }
 
-/* Inactive state */
 .nav-links li .day-icon.inactive {
-  background-color: var(--color-dark); /* Gray for inactive */
-  color: var(--color-light); /* Keep checkmark color consistent */
+  background-color: var(--color-dark);
+  color: var(--color-light);
 }
 
-/* Active state */
 .nav-links li .day-icon.active {
   background-color: var(--button-background-light);
   color: var(--color-light);
 }
 
-/* Checkmark inside the day icon */
 .nav-links li .day-icon .checkmark {
   font-size: 1.5rem;
 }
 
-/* Day labels (for day abbreviations) */
 .nav-links li .day-label {
   margin-top: 8px;
   font-size: 1.2rem;
@@ -126,16 +120,14 @@ nav {
   font-weight: 500;
 }
 
-/* Hover effect on the day icon */
 .nav-links li .day-icon:hover {
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* -- Streak Icon Animation -- */
 .streak-icon-container {
-  position: relative;
+  position: fixed;
   top: 1rem;
-  left: 1rem;
+  right: 1rem;
   background-color: var(--button-background-light);
   padding: 0.5rem;
   border-radius: 12px;
@@ -153,22 +145,23 @@ nav {
   font-weight: bold;
   color: var(--color-light);
   z-index: 1;
-  animation: streakSmoothAnimation 3s ease-in-out infinite; /* Smoother and faster */
+  animation: streakSmoothAnimation 3s ease-in-out infinite;
 }
 
 .streak-icon {
   height: 80%;
   width: 80%;
   position: absolute;
-  animation: streakSmoothAnimation 3s ease-in-out infinite; /* Matches the streak count */
+  animation: streakSmoothAnimation 3s ease-in-out infinite;
 }
 
 @keyframes streakSmoothAnimation {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-5px); /* Slightly bigger movement for a more noticeable effect */
+    transform: translateY(-5px);
   }
 }
 
@@ -177,22 +170,18 @@ nav {
   font-size: 1.5rem;
 }
 
-/* Styles for the crossmark */
 .crossmark {
   font-size: 1.5rem;
 }
 
-/* Red cross for inactive days */
 .day-icon.inactive .crossmark {
   color: var(--color-light);
 }
 
-/* Gray cross for active days */
 .day-icon.active .crossmark {
   color: var(--color-dark);
 }
 
-/* -- Foresights Logo and Icon -- */
 .foresights {
   position: fixed;
   height: 6rem;
@@ -205,7 +194,6 @@ nav {
   justify-content: flex-start;
 }
 
-/* -- Main Container and Layout -- */
 .container {
   display: flex;
   flex-direction: column;
@@ -217,21 +205,23 @@ nav {
   display: flex;
   flex-direction: column;
   margin-top: 10rem;
+  padding: 0 2rem;
 }
 
 .content {
   display: flex;
   flex: 1;
   height: auto;
+  flex-direction: column;
 }
 
-/* Stat Box Styling - 2x2 Grid */
 .stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Creates two equal columns */
-  gap: 2rem; /* Adds space between the boxes */
-  width: 45%; /* Adjust width to fit nicely */
-  margin: -1rem auto; /* Centers the grid horizontally */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 800px;
+  margin: -1rem auto;
 }
 
 .stat-box {
@@ -253,45 +243,25 @@ nav {
   font-weight: bold;
 }
 
-/* -- Button Container Styling -- */
 .btn-container {
   display: flex;
-  justify-content: flex-start;
-  margin-top: 2rem;
-  padding-left: 13%; /* Adjust this value to move the button more or less to the right */
-}
-
-/* -- Text and Image Styling -- */
-.text {
-  flex: 1;
-  padding-right: 2rem;
-  display: flex;
-  flex-direction: column;
   justify-content: center;
+  margin-top: 2rem;
 }
 
-.text p {
-  margin-bottom: -1rem;
-}
-
-/* Placeholder Div Styling */
 .image-placeholder {
-  width: 48%; /* Set the width to 50% to decrease it */
-  height: 450px; /* Keep the height or adjust as needed */
+  width: 100%;
+  height: 450px;
   border-radius: 20px;
-  background-color: var(--button-background-light); /* Use a background as a placeholder */
-  margin-left: 2rem;
+  background-color: var(--button-background-light);
+  margin-top: 2rem;
   z-index: -1;
-}
-
-/* Optional animation to simulate movement */
-.image-placeholder {
   animation: headerAnimation 2s ease-in-out infinite;
 }
 
-/* -- Placeholder Animation -- */
 @keyframes headerAnimation {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
@@ -301,25 +271,25 @@ nav {
   }
 }
 
-/* -- Button Styles for Simulator -- */
 .btn {
   position: relative;
-  top: 3vh; 
+  top: 3vh;
   display: inline-block;
   padding: 1rem 2rem;
   border: 3px solid transparent;
   border-radius: 8px;
   cursor: pointer;
   transition: border-color 0.25s;
-  background-color: var(--button-background-dark);
+  background-color: var(--button-background-light);
+  color: var(--color-dark);
 }
 
 .btn:hover {
-  border-color: var(--accent-color); 
+  border-color: var(--accent-color);
 }
 
 .btn-more {
-  font-size: 1.5em; 
+  font-size: 1.5em;
   margin-top: 3rem;
   width: 15rem;
   transition: background 0.3s ease-out;
@@ -334,12 +304,12 @@ nav {
   transition: transform 0.3s ease-out;
 }
 
-/* -- Author and Popup Info -- */
+/* -- Author Popup -- */
 .icon-background {
   position: fixed;
   left: 1rem;
   bottom: 1rem;
-  background-color: var(--button-background-dark);
+  background-color: var(--button-background-light);
   padding: 1rem;
   border-radius: 12px;
   cursor: pointer;
@@ -347,53 +317,48 @@ nav {
 }
 
 .authors {
-  fill: var(--color-light);
+  fill: var(--color-dark);
   height: 2rem;
   width: 2rem;
   transition: transform 0.5s ease;
-  background-color: var(--button-background-dark);
+  background-color: var(--button-background-light);
 }
 
 .authors.rotate {
   transform: rotate(360deg);
 }
 
-
 .authors:hover {
-  fill: var(--accent-color); /* Color change on hover */
+  fill: var(--accent-color);
 }
 
-/* -- Popup for Author Links -- */
-.popup {
+.popup.authors-popup {
   position: fixed;
   bottom: 6rem;
   left: 1rem;
-  background-color: var(--button-background-dark);
+  background-color: var(--button-background-light);
   padding: 1.8rem;
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.5s ease-in-out;
-  margin-bottom: 1.5rem;
-}
-
-.popup.visible {
   max-height: 30rem;
+  overflow: auto;
+  z-index: 500;
+  transition: max-height 0.5s ease-in-out;
 }
 
-.popup a {
+.popup.authors-popup a {
   display: block;
   margin: 0.5rem 0;
   font-size: 1.2rem;
-  color: var(--color-light);
+  color: var(--color-dark);
   opacity: 0.8;
 }
 
-.popup a:hover {
+.popup.authors-popup a:hover {
   color: var(--accent-color);
 }
 
+/* -- Coach Popup -- */
 .coach-container {
   position: fixed;
   bottom: 1rem;
@@ -408,7 +373,7 @@ nav {
   height: 6rem;
   border-radius: 50%;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease; /* Smooth scaling */
+  transition: transform 0.3s ease;
 }
 
 .coach-lightbulb {
@@ -417,99 +382,107 @@ nav {
   right: 0.5rem;
   font-size: 2rem;
   color: yellow;
-  transition: transform 0.3s ease; /* Smooth scaling */
+  transition: transform 0.3s ease;
 }
 
-/* Hover both image and lightbulb */
 .coach-container:hover .coach-image,
 .coach-container:hover .coach-lightbulb {
-  transform: scale(1.1); /* Scales both elements */
+  transform: scale(1.1);
 }
 
-/* Coach Popup Styling */
 .popup.coach-popup {
   position: fixed;
-  bottom: 1rem;
-  left: 58rem; /* Aligns the popup to the left of the coach icon */
+  bottom: 8rem;
+  right: 2rem; /* Keep it close to the right, but use transform to adjust */
   background-color: var(--button-background-light);
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
-  width: 42rem; 
-  height: 11rem; 
-  overflow: auto; /* Allows scrolling if content overflows vertically */
-  transition: max-width 0.5s ease-in-out, max-height 0.5s ease-in-out; /* Smooth transition */
+  max-width: 685px;
+  width: 100%;
+  height: 100%;
+  max-height: 13rem;
+  overflow: auto;
+  z-index: 550;
+  transition: max-width 0.5s ease-in-out, max-height 0.5s ease-in-out;
+
+  transform: translateX(-1rem); /* Move it left by 5rem, adjust this value to move it more */
 }
 
-/* Ensure the text inside doesn't overflow */
 .popup.coach-popup p {
-  white-space: normal; /* Ensure text wraps within the container */
+  white-space: normal;
   line-height: 1.5;
 }
 
-/* Coach popup hover and active state */
-.coach-popup.visible {
-  max-width: 80rem;
-  overflow-x: hidden; /* Disable horizontal scrolling */
-  overflow-y: auto; /* Allow vertical scrolling if needed */
-}
-
-/* Hidden Class - used when popup is visible */
 .hidden {
-  display: none; /* Hides the lightbulb */
+  display: none;
 }
 
-/* -- Media Query for Larger Screens -- */
+/* -- Media Queries for Responsiveness -- */
+@media (max-width: 768px) {
+  .nav-links {
+    gap: 15px;
+    padding: 0.5rem 1rem;
+  }
+
+  .nav-links li .day-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .nav-links li .day-label {
+    font-size: 1rem;
+  }
+
+  .stat-box h3 {
+    font-size: 1.2rem;
+  }
+
+  .stat-box p {
+    font-size: 1.6rem;
+  }
+
+  .streak-icon-container {
+    height: 5rem;
+    width: 4.8rem;
+  }
+
+  .streak-count {
+    font-size: 1.6rem;
+  }
+
+  .coach-image {
+    width: 5rem;
+    height: 5rem;
+  }
+
+  .coach-lightbulb {
+    font-size: 1.8rem;
+  }
+}
+
 @media (min-width: 768px) {
   .content {
     flex-direction: row;
   }
-}
 
-/* -- Light Mode Overrides -- */
-@media (prefers-color-scheme: light) {
-  body {
-    background-color: var(--color-light);
-    color: var(--color-dark);
+  .stats {
+    width: 45%;
   }
 
-  button {
-    background-color: var(--button-background-light);
+  .image-placeholder {
+    width: 48%;
+    margin-left: 2rem;
+    margin-top: 0;
   }
 
-  .nav-links {
-    background: var(--button-background-light);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+  .btn-container {
+    justify-content: flex-start;
+    padding-left: 13%;
   }
 
-  .nav-links li a {
-    color: var(--color-dark);
-  }
-
-  .nav-links li a:hover:before {
-    background: var(--accent-color);
-  }
-
-  .icon-background {
-    background-color: var(--button-background-light);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-  }
-
-  .popup {
-    background-color: var(--button-background-light);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-  }
-
-  .authors {
-    fill: var(--color-dark);
-    background-color: var(--button-background-light);
-  }
-
-  .popup a {
-    color: var(--color-dark);
-  }
-
-  .btn {
-    background-color: var(--button-background-light);
+  .popup.coach-popup {
+    bottom: 1rem;
+    right: calc(6rem + 2rem);
   }
 }
