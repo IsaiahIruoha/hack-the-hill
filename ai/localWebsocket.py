@@ -1,6 +1,5 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 import pyrealsense2 as rs
 import numpy as np
 import time
@@ -88,6 +87,9 @@ def track_club_movement(result, prev_position, prev_time, depth_frame):
     launch_angle = 0  # Default launch angle
     top_3d = None
     bottom_3d = None
+    bbox = None
+    label = "Club Head"
+    confidence = None
 
     if predictions:
         prediction = predictions[0]  # Assuming we're only tracking the first detected object (club face)
@@ -95,6 +97,10 @@ def track_club_movement(result, prev_position, prev_time, depth_frame):
         y = int(prediction['y'])
         width = int(prediction['width'])
         height = int(prediction['height'])
+        confidence = prediction.get('confidence', 0.0)  # Get confidence score
+
+        # Store the bounding box for drawing later
+        bbox = (x, y, width, height)
 
         # Get the top and bottom of the bounding box (y-coordinates)
         top_y = y  # Top of the club head
@@ -155,12 +161,14 @@ def track_club_movement(result, prev_position, prev_time, depth_frame):
             prev_position = {"x": int(cx), "y": int((top_y + bottom_y) / 2), "z": float((top_depth + bottom_depth) / 2)}
             prev_time = time.time()
 
-    return top_3d, bottom_3d, avg_speed, avg_launch_angle, prev_position, prev_time
+    return top_3d, bottom_3d, avg_speed, avg_launch_angle, prev_position, prev_time, bbox, confidence
 
-# WebSocket endpoint for streaming RealSense video
+# WebSocket endpoint for streaming RealSense video and stats
 @app.websocket("/ws/video")
 async def video_stream(websocket: WebSocket):
     await websocket.accept()
+
+    global prev_position, prev_time
 
     try:
         while True:
@@ -170,19 +178,46 @@ async def video_stream(websocket: WebSocket):
             # Align the depth frame to the RGB frame
             aligned_frames = align.process(frames)
 
-            # Get RGB frame
+            # Get RGB and depth frames
             color_frame = aligned_frames.get_color_frame()
+            depth_frame = aligned_frames.get_depth_frame()
 
-            if not color_frame:
+            if not color_frame or not depth_frame:
                 continue
 
             # Convert RGB frame to numpy array
             color_image = np.asanyarray(color_frame.get_data())
 
+            # Send the frame to the local inference server and get results
+            result = model.predict(color_image).json()
+
+            # Track the club face movement in 3D space
+            top_3d, bottom_3d, avg_speed, avg_launch_angle, prev_position, prev_time, bbox, confidence = track_club_movement(
+                result, prev_position, prev_time, depth_frame)
+
+            # Draw bounding box and label on the frame
+            if bbox is not None:
+                x, y, width, height = bbox
+                # Draw bounding box
+                cv2.rectangle(color_image, (x, y), (x + width, y + height), (0, 255, 0), 2)
+                # Draw label with confidence score
+                label_text = f"Club Head: {confidence:.2f}"
+                cv2.putText(color_image, label_text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
             # Encode frame as JPEG and send as base64 string over WebSocket
             _, jpeg_frame = cv2.imencode('.jpg', color_image)
             jpeg_base64 = base64.b64encode(jpeg_frame).decode('utf-8')
-            await websocket.send_text(jpeg_base64)
+
+            # Package both video and stats
+            message = {
+                "image": jpeg_base64,
+                "stats": {
+                    "speed": avg_speed,
+                    "launch_angle": avg_launch_angle
+                }
+            }
+
+            await websocket.send_json(message)
 
     except WebSocketDisconnect:
         print("WebSocket connection closed")
@@ -190,40 +225,3 @@ async def video_stream(websocket: WebSocket):
     except Exception as e:
         print(f"WebSocket error: {e}")
         await websocket.close()
-
-# REST API to get club face data
-@app.get("/club-face")
-async def get_club_face():
-    global prev_position, prev_time
-
-    # Wait for a new set of frames
-    frames = pipeline.wait_for_frames()
-
-    # Align the depth frame to the RGB frame
-    aligned_frames = align.process(frames)
-
-    # Get RGB and depth frames
-    color_frame = aligned_frames.get_color_frame()
-    depth_frame = aligned_frames.get_depth_frame()
-
-    if not color_frame or not depth_frame:
-        return JSONResponse(content={"error": "No frames available"}, status_code=500)
-
-    # Convert RGB frame to numpy array
-    color_image = np.asanyarray(color_frame.get_data())
-
-    # Send the frame to the local inference server and get results
-    result = model.predict(color_image).json()  # Use the Roboflow SDK for local inference
-
-    # Track the club face movement in 3D space
-    top_3d, bottom_3d, avg_speed, avg_launch_angle, prev_position, prev_time = track_club_movement(
-        result, prev_position, prev_time, depth_frame)
-
-    # Log the values for debugging
-    print(f"Top Position: {top_3d}, Bottom Position: {bottom_3d}, Speed: {avg_speed}, Launch Angle: {avg_launch_angle}")
-
-    # Return the results as JSON
-    return {
-        "speed": avg_speed,
-        "launch_angle": avg_launch_angle
-    }
