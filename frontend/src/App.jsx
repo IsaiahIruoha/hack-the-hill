@@ -201,26 +201,29 @@ function App() {
             )}
           </div>
           {/* Toggle Button */}
-          <div className="toggle-container">
-            <button onClick={handleToggleViewMode} className="toggle-button">
-              Switch to {viewMode === 'normal' ? 'Depth View' : 'Normal View'}
-            </button>
-          </div>
+          
         </div>
-      </div>
-      <div className="btn-container">
-        <a
-          href="#"
+        <div className="">
+        <button
           className="btn btn-more"
           onClick={() => {
-            setIsCoachPopupVisible(true); // Always show the coach popup
-            setReviewTrigger((prev) => prev + 1); // Increment to trigger new review
-            markDayAsComplete(); // Keep tracking the streak
+            markDayAsComplete(); // Call the same function you are calling on the anchor
+            window.open(
+              "https://foresights.ca/simulator",
+              "_blank",
+              "noreferrer"
+            );
           }}
         >
-          Generate Review<i className="fas fa-chevron-right"></i>
-        </a>
+          Snapshot Review<i className="fas fa-chevron-right"></i>
+        </button>
+        <button onClick={handleToggleViewMode} className="btn btn-more">
+              Switch to {viewMode === "normal" ? "Depth View" : "Normal View"}
+              <i className="fas fa-chevron-right"></i>
+            </button>
       </div>
+      </div>
+      
       {isPopupVisible && (
         <div className="popup visible authors-popup">
           <h3>Creators</h3>
