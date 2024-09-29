@@ -90,19 +90,22 @@ function App() {
   useEffect(() => {
     // WebSocket setup
     const socket = new WebSocket("wss://foresights.ngrok.dev/ws/video");
+    // const socket = new WebSocket("ws://127.0.0.1:8000/ws/video");
 
     // Handle connection open
     socket.onopen = () => {
       console.log("WebSocket connection established");
     };
 
-    // Handle incoming messages from the WebSocket (video and stats)
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       
       // Update video source with the live feed
       setVideoSrc('data:image/jpeg;base64,' + data.image); 
-
+    
+      // Update depth image source with the depth image feed
+      setDepthImageSrc('data:image/jpeg;base64,' + data.depth_image); // Add this line
+    
       // Update the club data (speed and angle)
       setClubData({
         speed: data.stats.speed !== null ? data.stats.speed : 0,
