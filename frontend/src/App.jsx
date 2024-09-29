@@ -108,8 +108,8 @@ function App() {
     
       // Update the club data (speed and angle)
       setClubData({
-        speed: data.stats.speed !== null ? data.stats.speed : 0,
-        launch_angle: data.stats.launch_angle !== null ? data.stats.launch_angle : 0,
+        speed: data.stats.speed !== null ? data.stats.speed : 0.0,
+        launch_angle: data.stats.launch_angle !== null ? data.stats.launch_angle : 0.0,
       });
     };
 
