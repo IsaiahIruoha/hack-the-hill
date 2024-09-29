@@ -205,7 +205,7 @@ nav {
   display: flex;
   flex-direction: column;
   margin-top: 10rem;
-  padding: 0 2rem;
+  padding: 0 2rem; 
 }
 
 .content {
@@ -258,6 +258,13 @@ nav {
   margin-top: 2rem;
   z-index: -1;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); 
+}
+
+.image-placeholder img {
+  width: 100%; /* Ensure the image takes up the full width of the container */
+  height: auto; /* Maintain aspect ratio */
+  object-fit: contain; /* Ensure it fits within the container while keeping the aspect ratio */
+  border-radius: 20px;
 }
 
 .btn {
