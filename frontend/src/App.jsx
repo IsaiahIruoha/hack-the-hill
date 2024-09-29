@@ -105,15 +105,15 @@ function App() {
 
       // Update the club data (speed and angle)
       setClubData({
-        speed: data.stats.speed,
-        launch_angle: data.stats.launch_angle,
+        speed: data.stats.speed !== null ? data.stats.speed : 0,
+        launch_angle: data.stats.launch_angle !== null ? data.stats.launch_angle : 0,
       });
     };
 
     // Handle WebSocket errors
     socket.onerror = (error) => {
       console.error("WebSocket error:", error);
-    };
+    }
 
     // Handle WebSocket closure
     socket.onclose = () => {
@@ -177,13 +177,13 @@ function App() {
             <div className="stat-box">
               <h3>Club Head Speed</h3>
               <p>
-                {clubData.speed !== null ? `${clubData.speed.toFixed(2)} m/s` : 'Calculating...'}
+                {clubData.speed !== 0 ? `${clubData.speed.toFixed(2)} m/s` : 'Calculating...'}
               </p>
             </div>
             <div className="stat-box">
               <h3>Launch Angle</h3>
               <p>
-                {clubData.launch_angle !== null
+                {clubData.launch_angle !== 0
                   ? `${clubData.launch_angle.toFixed(2)}°`
                   : 'Calculating...'}
               </p>
@@ -191,13 +191,13 @@ function App() {
             <div className="stat-box">
               <h3>Projected Ball Speed</h3>
               <p>
-                {projectedBallSpeed !== null ? `${projectedBallSpeed} m/s` : 'Calculating...'}
+                {projectedBallSpeed !== 0 ? `${projectedBallSpeed} m/s` : 'Calculating...'}
               </p>
             </div>
             <div className="stat-box">
               <h3>Projected Distance</h3>
               <p>
-                {projectedDistance !== null ? `${projectedDistance} yards` : 'Calculating...'}
+                {projectedDistance !== 0 ? `${projectedDistance} yards` : 'Calculating...'}
               </p>
             </div>
           </div>
