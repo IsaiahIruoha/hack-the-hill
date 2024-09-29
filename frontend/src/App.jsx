@@ -88,32 +88,42 @@ function App() {
 
   // WebSocket connection to receive video feed and club data (speed and launch angle)
   useEffect(() => {
-    const ws = new WebSocket('ws://127.0.0.1:8000/ws/video');
+    // WebSocket setup
+    const socket = new WebSocket("wss://720a-142-169-16-241.ngrok-free.app/ws/video");
 
-    ws.onmessage = (event) => {
+    // Handle connection open
+    socket.onopen = () => {
+      console.log("WebSocket connection established");
+    };
+
+    // Handle incoming messages from the WebSocket (video and stats)
+    socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      const { image, depth_image, stats } = data;
+      
+      // Update video source with the live feed
+      setVideoSrc('data:image/jpeg;base64,' + data.image); 
 
-      // Update video feed and club stats
-      setVideoSrc(`data:image/jpeg;base64,${image}`);
-      setDepthImageSrc(`data:image/jpeg;base64,${depth_image}`);
-
-      setClubData((prevData) => ({
-        speed: stats.speed !== undefined ? stats.speed : prevData.speed,
-        launch_angle: stats.launch_angle !== undefined ? stats.launch_angle : prevData.launch_angle,
-      }));
+      // Update the club data (speed and angle)
+      setClubData({
+        speed: data.stats.speed,
+        launch_angle: data.stats.launch_angle,
+      });
     };
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+    // Handle WebSocket errors
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
     };
 
-    ws.onclose = () => {
-      console.warn('WebSocket connection closed');
+    // Handle WebSocket closure
+    socket.onclose = () => {
+      console.log("WebSocket connection closed");
     };
 
-    return () => ws.close();
-  }, []); // Empty dependency array to run once
+    return () => {
+      socket.close();  // Cleanup WebSocket on component unmount
+    };
+  }, []);
 
   const projectedBallSpeed = calculateProjectedBallSpeed(clubData.speed);
   const projectedDistance = calculateProjectedDistance(clubData.speed, clubData.launch_angle);
