@@ -89,7 +89,7 @@ function App() {
   // WebSocket connection to receive video feed and club data (speed and launch angle)
   useEffect(() => {
     // WebSocket setup
-    const socket = new WebSocket("wss://720a-142-169-16-241.ngrok-free.app/ws/video");
+    const socket = new WebSocket("wss://foresights.ngrok.dev/ws/video");
 
     // Handle connection open
     socket.onopen = () => {
