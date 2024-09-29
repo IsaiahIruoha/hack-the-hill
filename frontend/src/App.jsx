@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
-import Message from "./components/Messages"
+import Message from "./components/Messages";
 
 function App() {
   const [days, setDays] = useState({});
@@ -16,6 +16,9 @@ function App() {
   const [videoSrc, setVideoSrc] = useState(''); // Store the video feed
   const [depthImageSrc, setDepthImageSrc] = useState(''); // Store the depth image feed
   const videoRef = useRef(null); // Reference for the video feed
+
+  // New state variable to trigger review re-generation
+  const [reviewTrigger, setReviewTrigger] = useState(0);
 
   const getDateString = (date) => date.toISOString().split('T')[0];
 
@@ -205,22 +208,22 @@ function App() {
           </div>
         </div>
       </div>
-
       <div className="btn-container">
         <a
-          href="https://foresights.ca/simulator"
+          href="#"
           className="btn btn-more"
-          target="_blank"
-          rel="noreferrer"
-          onClick={markDayAsComplete}
+          onClick={() => {
+            setIsCoachPopupVisible(true); // Always show the coach popup
+            setReviewTrigger((prev) => prev + 1); // Increment to trigger new review
+            markDayAsComplete(); // Keep tracking the streak
+          }}
         >
-          Snapshot Review<i className="fas fa-chevron-right"></i>
+          Generate Review<i className="fas fa-chevron-right"></i>
         </a>
       </div>
-
       {isPopupVisible && (
         <div className="popup visible authors-popup">
-          <h3>Authors</h3>
+          <h3>Creators</h3>
           <hr />
           <a href="https://www.linkedin.com/in/isaiahiruoha/" target="_blank" rel="noreferrer">
             Isaiah Iruoha
@@ -234,7 +237,7 @@ function App() {
         </div>
       )}
       <div className="icon-background" onClick={togglePopup}>
-        <svg
+      <svg
           className={`authors ${isPopupVisible ? 'rotate' : ''}`}
           fill="#000000"
           height="800px"
@@ -267,17 +270,29 @@ function App() {
           </g>
         </svg>
       </div>
-      <div className="coach-container" onClick={toggleCoachPopup}>
-        <img src="coach.png" alt="Coach" className="coach-image" />
+      <div className="coach-container">
+        <img
+          src="coach.png"
+          alt="Coach"
+          className="coach-image"
+          onClick={() => setIsCoachPopupVisible(true)}
+        />
 
-        <i className={`fas fa-lightbulb coach-lightbulb ${isCoachPopupVisible ? 'hidden' : ''}`}></i>
+        <i
+          className={`fas fa-lightbulb coach-lightbulb ${isCoachPopupVisible ? 'hidden' : ''}`}
+          onClick={() => setIsCoachPopupVisible(true)}
+        ></i>
 
         {isCoachPopupVisible && (
           <div className="popup coach-popup visible">
             <h3>Professor Par</h3>
             <hr />
-            <div >
-              <Message speed={clubData.speed} angle={clubData.launch_angle}/>
+            <div>
+              <Message
+                speed={clubData.speed}
+                angle={clubData.launch_angle}
+                reviewTrigger={reviewTrigger} // Pass reviewTrigger here
+              />
             </div>
           </div>
         )}
