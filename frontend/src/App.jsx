@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import axios from 'axios';
 
@@ -11,6 +11,9 @@ function App() {
     speed: 0, // Club Head Speed in m/s
     launch_angle: 0, // Launch Angle in degrees
   });
+
+  const [videoSrc, setVideoSrc] = useState(''); // Store the video feed
+  const videoRef = useRef(null); // Reference for the video feed
 
   const getDateString = (date) => date.toISOString().split('T')[0];
 
@@ -67,7 +70,7 @@ function App() {
     return (clubHeadSpeed / 1.5).toFixed(2); // Ball speed in m/s
   };
 
-  // **New** Calculate Carry Distance using simplified projectile motion formula
+  // Calculate Carry Distance using simplified projectile motion formula
   const calculateProjectedDistance = (clubHeadSpeed, launchAngle) => {
     const g = 9.81; // Gravity in m/s²
     const carryDistance = (Math.pow(clubHeadSpeed, 2) / g) * Math.sin(2 * (launchAngle * (Math.PI / 180)));
@@ -99,6 +102,17 @@ function App() {
     }, 1000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  // WebSocket connection to receive video feed
+  useEffect(() => {
+    const ws = new WebSocket('ws://127.0.0.1:8000/ws/video');
+    
+    ws.onmessage = (event) => {
+      setVideoSrc(`data:image/jpeg;base64,${event.data}`);
+    };
+
+    return () => ws.close();
   }, []);
 
   const projectedBallSpeed = calculateProjectedBallSpeed(clubData.speed);
@@ -163,7 +177,8 @@ function App() {
             </div>
           </div>
           <div className="image-placeholder">
-            {/* Placeholder div for future content */}
+            {/* Render the video feed */}
+            {videoSrc && <img ref={videoRef} src={videoSrc} alt="RealSense Video Feed" />}
           </div>
         </div>
       </div>

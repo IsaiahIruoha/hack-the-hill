@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import pyrealsense2 as rs
@@ -6,6 +6,8 @@ import numpy as np
 import time
 import math
 import roboflow
+import cv2
+import base64
 
 # Initialize the FastAPI app
 app = FastAPI()
@@ -13,7 +15,7 @@ app = FastAPI()
 # Set up CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://www.foresights.ca"],  # Remove trailing slashes
+    allow_origins=["http://localhost:5173", "https://www.foresights.ca"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -155,7 +157,41 @@ def track_club_movement(result, prev_position, prev_time, depth_frame):
 
     return top_3d, bottom_3d, avg_speed, avg_launch_angle, prev_position, prev_time
 
+# WebSocket endpoint for streaming RealSense video
+@app.websocket("/ws/video")
+async def video_stream(websocket: WebSocket):
+    await websocket.accept()
 
+    try:
+        while True:
+            # Wait for a new set of frames
+            frames = pipeline.wait_for_frames()
+
+            # Align the depth frame to the RGB frame
+            aligned_frames = align.process(frames)
+
+            # Get RGB frame
+            color_frame = aligned_frames.get_color_frame()
+
+            if not color_frame:
+                continue
+
+            # Convert RGB frame to numpy array
+            color_image = np.asanyarray(color_frame.get_data())
+
+            # Encode frame as JPEG and send as base64 string over WebSocket
+            _, jpeg_frame = cv2.imencode('.jpg', color_image)
+            jpeg_base64 = base64.b64encode(jpeg_frame).decode('utf-8')
+            await websocket.send_text(jpeg_base64)
+
+    except WebSocketDisconnect:
+        print("WebSocket connection closed")
+
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+        await websocket.close()
+
+# REST API to get club face data
 @app.get("/club-face")
 async def get_club_face():
     global prev_position, prev_time
