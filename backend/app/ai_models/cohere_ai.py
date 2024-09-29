@@ -21,14 +21,14 @@ class CohereClient:
         )
         return response  # Get the generated text
 
-if __name__ == "__main__":
-    # Initialize CohereClient with the API key
-    cohere_client = CohereClient()
+# if __name__ == "__main__":
+#     # Initialize CohereClient with the API key
+#     cohere_client = CohereClient()
 
-    # Generate text based on a prompt
-    # prompt = "The computer vision model detected a 'cat' with 0.95 confidence. The object is located at coordinates {'x': 100, 'y': 200}. Generate a brief description of this detection."
-    prompt = "Your ball flight is straight and solid, but try adjusting your launch angle for more carry distance."
-    generated_text = cohere_client.generate_text(prompt)
+#     # Generate text based on a prompt
+#     # prompt = "The computer vision model detected a 'cat' with 0.95 confidence. The object is located at coordinates {'x': 100, 'y': 200}. Generate a brief description of this detection."
+#     prompt = "Your ball flight is straight and solid, but try adjusting your launch angle for more carry distance."
+#     generated_text = cohere_client.generate_text(prompt)
     
-    # Print the result
-    print(generated_text.text)
+#     # Print the result
+#     print(generated_text.text)
