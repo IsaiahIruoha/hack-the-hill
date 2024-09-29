@@ -263,8 +263,8 @@ nav {
 
 .image-placeholder img {
   width: 100%; /* Ensure the image takes up the full width of the container */
-  height: auto; /* Maintain aspect ratio */
-  object-fit: contain; /* Ensure it fits within the container while keeping the aspect ratio */
+  height: 100%; /* Maintain aspect ratio */
+  object-fit: cover; /* Ensure it fits within the container while keeping the aspect ratio */
   border-radius: 20px;
 }
 
@@ -354,6 +354,16 @@ nav {
 
 .popup.authors-popup a:hover {
   color: var(--accent-color);
+}
+
+/* Hide the coach popup when the 'hidden' class is applied */
+.popup.coach-popup.hidden {
+  display: none;
+}
+
+/* Show the coach popup when the 'visible' class is applied */
+.popup.coach-popup.visible {
+  display: block;
 }
 
 /* -- Coach Popup -- */

@@ -205,22 +205,19 @@ function App() {
         </div>
         <div className="">
         <button
-          className="btn btn-more"
-          onClick={() => {
-            markDayAsComplete(); // Call the same function you are calling on the anchor
-            window.open(
-              "https://foresights.ca/simulator",
-              "_blank",
-              "noreferrer"
-            );
-          }}
-        >
-          Snapshot Review<i className="fas fa-chevron-right"></i>
-        </button>
-        <button onClick={handleToggleViewMode} className="btn btn-more">
-              Switch to {viewMode === "normal" ? "Depth View" : "Normal View"}
-              <i className="fas fa-chevron-right"></i>
-            </button>
+            className="btn btn-more"
+            onClick={() => {
+              setIsCoachPopupVisible(true); // Always show the coach popup
+              setReviewTrigger((prev) => prev + 1); // Increment to trigger new review
+              markDayAsComplete(); // Keep tracking the streak
+            }}
+          >
+            Generate Review<i className="fas fa-chevron-right"></i>
+          </button>
+          <button onClick={handleToggleViewMode} className="btn btn-more">
+            Switch to {viewMode === "normal" ? "Depth View" : "Normal View"}
+            <i className="fas fa-chevron-right"></i>
+          </button>
       </div>
       </div>
       
@@ -278,27 +275,26 @@ function App() {
           src="coach.png"
           alt="Coach"
           className="coach-image"
-          onClick={() => setIsCoachPopupVisible(true)}
+          onClick={toggleCoachPopup}
         />
 
         <i
           className={`fas fa-lightbulb coach-lightbulb ${isCoachPopupVisible ? 'hidden' : ''}`}
-          onClick={() => setIsCoachPopupVisible(true)}
+          onClick={toggleCoachPopup}
         ></i>
+      </div>
 
-        {isCoachPopupVisible && (
-          <div className="popup coach-popup visible">
-            <h3>Professor Par</h3>
-            <hr />
-            <div>
-              <Message
-                speed={clubData.speed}
-                angle={clubData.launch_angle}
-                reviewTrigger={reviewTrigger} // Pass reviewTrigger here
-              />
-            </div>
-          </div>
-        )}
+      {/* Always render the coach popup */}
+      <div className={`popup coach-popup ${isCoachPopupVisible ? 'visible' : 'hidden'}`}>
+        <h3>Professor Par</h3>
+        <hr />
+        <div>
+          <Message
+            speed={clubData.speed}
+            angle={clubData.launch_angle}
+            reviewTrigger={reviewTrigger} // Pass reviewTrigger here
+          />
+        </div>
       </div>
     </div>
   );
