@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
-import axios from 'axios';
 
 function App() {
   const [days, setDays] = useState({});
@@ -78,38 +77,20 @@ function App() {
     return carryDistanceInYards.toFixed(2); // Distance in yards
   };
 
-  useEffect(() => {
-    const fetchClubData = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/club-face');
-        
-        setClubData(prevData => ({
-          speed: response.data.speed !== undefined ? response.data.speed : prevData.speed, // Club Head Speed in m/s
-          launch_angle: response.data.launch_angle !== undefined ? response.data.launch_angle : prevData.launch_angle, // Launch Angle in degrees
-        }));
-
-        console.log("Updated Club Data:", {
-          speed: response.data.speed,
-          launch_angle: response.data.launch_angle,
-        });
-      } catch (error) {
-        console.error('Error fetching club data', error);
-      }
-    };
-
-    const interval = setInterval(() => {
-      fetchClubData();
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // WebSocket connection to receive video feed
+  // WebSocket connection to receive video feed and club data (speed and launch angle)
   useEffect(() => {
     const ws = new WebSocket('ws://127.0.0.1:8000/ws/video');
     
     ws.onmessage = (event) => {
-      setVideoSrc(`data:image/jpeg;base64,${event.data}`);
+      const data = JSON.parse(event.data);
+      const { image, stats } = data;
+
+      // Update video feed and club stats
+      setVideoSrc(`data:image/jpeg;base64,${image}`);
+      setClubData({
+        speed: stats.speed !== undefined ? stats.speed : clubData.speed,
+        launch_angle: stats.launch_angle !== undefined ? stats.launch_angle : clubData.launch_angle,
+      });
     };
 
     return () => ws.close();
