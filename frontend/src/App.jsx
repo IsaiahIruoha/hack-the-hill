@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
+import Message from "./components/Messages"
 
 function App() {
   const [days, setDays] = useState({});
@@ -7,8 +8,8 @@ function App() {
   const [isCoachPopupVisible, setIsCoachPopupVisible] = useState(false);
 
   const [clubData, setClubData] = useState({
-    speed: 0, // Club Head Speed in m/s
-    launch_angle: 0, // Launch Angle in degrees
+    speed: 0.0, // Club Head Speed in m/s
+    launch_angle: 0.0, // Launch Angle in degrees
   });
 
   const [videoSrc, setVideoSrc] = useState(''); // Store the video feed
@@ -220,7 +221,9 @@ function App() {
           <div className="popup coach-popup visible">
             <h3>Professor Par</h3>
             <hr />
-            <p>"Consistency is key—every swing builds your mastery. Focus on your form today, and tomorrow's power will follow!"</p>
+            <div >
+              <Message speed={clubData.speed} angle={clubData.launch_angle}/>
+            </div>
           </div>
         )}
       </div>
