@@ -48,6 +48,7 @@ prev_time = None
 MAX_SPEED = 150  # max golf swing speed (m/s)
 MAX_ANGLE = 90  # max possible launch angle in degrees
 HISTORY_LENGTH = 5  # Number of frames to use in the moving average
+MAX_TIME_DIFF = 0.5  # Maximum allowable time difference in seconds
 
 # Variables to store history
 speed_history = []
@@ -73,22 +74,21 @@ def calculate_launch_angle(top_z, bottom_z, top_y, bottom_y):
 # Function to calculate a moving average for a list of values
 def moving_average(values):
     if len(values) == 0:
-        return 0
+        return None  # Return None to indicate no data
     return sum(values) / len(values)
 
 # Function to track the club face movement in 3D space using depth information
 def track_club_movement(result, prev_position, prev_time, depth_frame):
     predictions = result['predictions']
-    
-    # Initialize avg_speed and avg_launch_angle to default values
-    avg_speed = 0  
-    avg_launch_angle = 0  
-    speed = 0  # Default speed
-    launch_angle = 0  # Default launch angle
+
+    # Initialize avg_speed and avg_launch_angle to None
+    avg_speed = None
+    avg_launch_angle = None
+    speed = None  # Default speed
+    launch_angle = None  # Default launch angle
     top_3d = None
     bottom_3d = None
     bbox = None
-    label = "Club Head"
     confidence = None
 
     if predictions:
@@ -128,38 +128,54 @@ def track_club_movement(result, prev_position, prev_time, depth_frame):
         launch_angle = calculate_launch_angle(top_depth, bottom_depth, top_y, bottom_y)
 
         # Add launch angle to history and calculate moving average
-        launch_angle_history.append(launch_angle)
-        if len(launch_angle_history) > HISTORY_LENGTH:
-            launch_angle_history.pop(0)
-        avg_launch_angle = moving_average(launch_angle_history)
+        if launch_angle is not None:
+            launch_angle_history.append(launch_angle)
+            if len(launch_angle_history) > HISTORY_LENGTH:
+                launch_angle_history.pop(0)
+            avg_launch_angle = moving_average(launch_angle_history)
 
-        # If there's a previous position, calculate speed and movement
-        if prev_position is not None:
+        # Calculate time difference
+        current_time = time.time()
+        time_diff = current_time - prev_time if prev_time else 0
+
+        # Only calculate speed if time difference is within an acceptable range
+        if prev_position is not None and 0 < time_diff < MAX_TIME_DIFF:
             prev_x, prev_y, prev_z = prev_position['x'], prev_position['y'], prev_position['z']
-            current_time = time.time()
-            time_diff = current_time - prev_time
-
             # Calculate the distance moved in 3D space
-            distance_moved = calculate_distance_3d(prev_x, prev_y, prev_z, cx, (top_y + bottom_y) / 2, (top_depth + bottom_depth) / 2)
+            distance_moved = calculate_distance_3d(
+                prev_x, prev_y, prev_z,
+                cx, (top_y + bottom_y) / 2, (top_depth + bottom_depth) / 2
+            )
             speed = distance_moved / time_diff if time_diff > 0 else 0
 
             # Add speed to history and calculate moving average
-            speed_history.append(speed)
-            if len(speed_history) > HISTORY_LENGTH:
-                speed_history.pop(0)
-            avg_speed = moving_average(speed_history)
+            if speed is not None and speed > 0:
+                speed_history.append(speed)
+                if len(speed_history) > HISTORY_LENGTH:
+                    speed_history.pop(0)
+                avg_speed = moving_average(speed_history)
 
             # Safety check: Ensure speed is within reasonable bounds
-            if avg_speed > MAX_SPEED:
-                avg_speed = 0  # Reset speed if it's abnormally high
+            if avg_speed is not None and avg_speed > MAX_SPEED:
+                avg_speed = None  # Reset avg_speed if it's abnormally high
 
-            # Update the previous position and time
-            prev_position = {"x": int(cx), "y": int((top_y + bottom_y) / 2), "z": float((top_depth + bottom_depth) / 2)}
-            prev_time = current_time
         else:
-            # Set the initial position and time if this is the first detection
-            prev_position = {"x": int(cx), "y": int((top_y + bottom_y) / 2), "z": float((top_depth + bottom_depth) / 2)}
-            prev_time = time.time()
+            # Too much time has passed; reset speed history
+            speed_history.clear()
+            avg_speed = None
+
+        # Update prev_position and prev_time
+        prev_position = {
+            "x": int(cx),
+            "y": int((top_y + bottom_y) / 2),
+            "z": float((top_depth + bottom_depth) / 2)
+        }
+        prev_time = current_time
+
+    else:
+        # No detection in this frame
+        print("No club head detected in this frame.")
+        # Optionally, keep prev_position and prev_time unchanged
 
     return top_3d, bottom_3d, avg_speed, avg_launch_angle, prev_position, prev_time, bbox, confidence
 
@@ -188,6 +204,12 @@ async def video_stream(websocket: WebSocket):
             # Convert RGB frame to numpy array
             color_image = np.asanyarray(color_frame.get_data())
 
+            # Convert depth frame to numpy array
+            depth_image = np.asanyarray(depth_frame.get_data())
+
+            # Apply color map to depth image for visualization
+            depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+
             # Send the frame to the local inference server and get results
             result = model.predict(color_image).json()
 
@@ -195,7 +217,7 @@ async def video_stream(websocket: WebSocket):
             top_3d, bottom_3d, avg_speed, avg_launch_angle, prev_position, prev_time, bbox, confidence = track_club_movement(
                 result, prev_position, prev_time, depth_frame)
 
-            # Draw bounding box and label on the frame
+            # Draw bounding box and label on the color image
             if bbox is not None:
                 x, y, width, height = bbox
                 # Draw bounding box
@@ -204,13 +226,27 @@ async def video_stream(websocket: WebSocket):
                 label_text = f"Club Head: {confidence:.2f}"
                 cv2.putText(color_image, label_text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-            # Encode frame as JPEG and send as base64 string over WebSocket
+            # Draw bounding box and label on the depth image
+            if bbox is not None:
+                x, y, width, height = bbox
+                # Draw bounding box
+                cv2.rectangle(depth_colormap, (x, y), (x + width, y + height), (0, 255, 0), 2)
+                # Draw label with confidence score
+                label_text = f"Club Head: {confidence:.2f}"
+                cv2.putText(depth_colormap, label_text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+            # Encode color image as JPEG
             _, jpeg_frame = cv2.imencode('.jpg', color_image)
             jpeg_base64 = base64.b64encode(jpeg_frame).decode('utf-8')
+
+            # Encode depth image as JPEG
+            _, depth_jpeg_frame = cv2.imencode('.jpg', depth_colormap)
+            depth_jpeg_base64 = base64.b64encode(depth_jpeg_frame).decode('utf-8')
 
             # Package both video and stats
             message = {
                 "image": jpeg_base64,
+                "depth_image": depth_jpeg_base64,
                 "stats": {
                     "speed": avg_speed,
                     "launch_angle": avg_launch_angle
@@ -224,4 +260,7 @@ async def video_stream(websocket: WebSocket):
 
     except Exception as e:
         print(f"WebSocket error: {e}")
+        # Optionally, log the traceback for more details
+        import traceback
+        traceback.print_exc()
         await websocket.close()
